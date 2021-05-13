@@ -7,12 +7,14 @@ const {
   remove,
   update,
 } = require("../../model/contacts");
+const {
+  validateCreateContact,
+  validateUpdateContact,
+} = require("./validation");
 
 router.get("/", async (req, res, next) => {
   try {
-    console.log("getAll");
     const contacts = await getAll();
-    // console.log(contacts);
     return res
       .status(200)
       .json({ status: "success", code: 200, data: { contacts } });
@@ -23,7 +25,6 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
   try {
-    // console.log(req);
     const contact = await getById(req.params.id);
     if (contact) {
       return res
@@ -38,10 +39,8 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", validateCreateContact, async (req, res, next) => {
   try {
-    console.log("createRout");
-    // console.log(req);
     const contact = await create(req.body);
     return res
       .status(201)
@@ -53,7 +52,6 @@ router.post("/", async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
   try {
-    // console.log(req);
     const contact = await remove(req.params.id);
     if (contact) {
       return res
@@ -68,19 +66,17 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-router.patch("/:id", async (req, res, next) => {
-  // res.json({ message: "template message" });
+router.patch("/:id", validateUpdateContact, async (req, res, next) => {
   try {
     const contacts = await update(req.params.id, req.body);
-    console.log(contacts);
     if (contacts) {
       return res
         .status(200)
         .json({ status: "success", code: 200, data: { contacts } });
     }
-     return res
-       .status(404)
-       .json({ status: "error", code: 404, message: "Not Found" });
+    return res
+      .status(404)
+      .json({ status: "error", code: 404, message: "Not Found" });
   } catch (error) {
     next(error);
   }

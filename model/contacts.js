@@ -4,16 +4,6 @@ const path = require("path");
 const contactsPath = path.join(__dirname, "contacts.json");
 const { v4: uuid } = require("uuid");
 
-//   (async function (from, to) {
-//   try {
-//     await fs.rename(from, to);
-//     const stats = await fs.stat(to);
-//     console.log(`stats: ${JSON.stringify(stats)}`);
-//   } catch (error) {
-//     console.error("there was an error:", error.message);
-//   }
-// })("/tmp/hello", "/tmp/world");
-
 const getAll = async () => {
   try {
     const data = await fs.readFile(contactsPath, "utf8");
@@ -45,7 +35,6 @@ const remove = async (contactId) => {
 
 const create = async (body) => {
   try {
-    console.log("createModel");
     const id = uuid();
     const contacts = await getAll();
     contacts.push({ id, ...body });
@@ -58,9 +47,6 @@ const create = async (body) => {
 
 const update = async (contactId, body) => {
   try {
-    // const contact = await getById(contactId);
-    // const contactUpdate = Object.assign(contact, body);
-    // console.log(contactUpdate);
     const contacts = await getAll();
     contacts.map((contact) =>
       String(contact.id) === contactId ? Object.assign(contact, body) : body
