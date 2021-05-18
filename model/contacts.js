@@ -25,9 +25,14 @@ const getById = async (contactId) => {
 const remove = async (contactId) => {
   try {
     const contacts = await getAll();
-    const deleteСontact = contacts.filter(({ id }) => String(id) !== contactId);
-    await fs.writeFile(contactsPath, JSON.stringify(deleteСontact, null, 2));
-    return contacts.find(({ id }) => String(id) === contactId);
+    const detectContactId = contacts.find(({ id }) => String(id) === contactId);
+    if (detectContactId) {
+      const deleteСontact = contacts.filter(
+        ({ id }) => String(id) !== contactId
+      );
+      await fs.writeFile(contactsPath, JSON.stringify(deleteСontact, null, 2));
+      return detectContactId;
+    }
   } catch (error) {
     console.log(error);
   }
