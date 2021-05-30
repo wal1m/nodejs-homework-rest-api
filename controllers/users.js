@@ -39,7 +39,7 @@ const login = async (req, res, next) => {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
-        message: "Invalid crendentials",
+        message: "Email or password is wrong",
       });
     }
 
@@ -58,6 +58,41 @@ const login = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res, next) => {};
+const logout = async (req, res, next) => {
+  await Users.updateToken(req.user.id, null);
+  return res.status(HttpCode.NO_CONTENT).json({});
+};
 
-module.exports = { signup, login, logout };
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const { email, subscription } = await Users.findById(req.user.id);
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: {
+        email,
+        subscription,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateSubscription = async (req, res, next) => {
+  try {
+    const { subscription } = await Users.update(req.user.id, req.body);
+    console.log(subscription);
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: {
+        subscription,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { signup, login, logout, getCurrentUser, updateSubscription };

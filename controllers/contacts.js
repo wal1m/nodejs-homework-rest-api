@@ -3,10 +3,16 @@ const { HttpCode } = require("../helpers/constants");
 
 const getAll = async (req, res, next) => {
   try {
-    const contacts = await Contacts.getAll();
-    return res
-      .status(HttpCode.OK)
-      .json({ status: "success", code: HttpCode.OK, data: { contacts } });
+    const userId = req.user.id;
+    const { contacts, total, page, limit } = await Contacts.getAll(
+      userId,
+      req.query
+    );
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { total, page, limit, contacts },
+    });
   } catch (error) {
     next(error);
   }
@@ -14,7 +20,8 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const contact = await Contacts.getById(req.params.id);
+    const userId = req.user.id;
+    const contact = await Contacts.getById(userId, req.params.id);
     if (contact) {
       return res
         .status(HttpCode.OK)
@@ -32,7 +39,8 @@ const getById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const contact = await Contacts.create(req.body);
+    const userId = req.user.id;
+    const contact = await Contacts.create({ ...req.body, owner: userId });
     return res
       .status(HttpCode.CREATED)
       .json({ status: "success", code: HttpCode.CREATED, data: { contact } });
@@ -43,7 +51,8 @@ const create = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const contact = await Contacts.remove(req.params.id);
+    const userId = req.user.id;
+    const contact = await Contacts.remove(userId, req.params.id);
     if (contact) {
       return res
         .status(HttpCode.OK)
@@ -61,7 +70,8 @@ const remove = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const contacts = await Contacts.update(req.params.id, req.body);
+    const userId = req.user.id;
+    const contacts = await Contacts.update(userId, req.params.id, req.body);
     if (contacts) {
       return res
         .status(HttpCode.OK)
@@ -76,24 +86,6 @@ const update = async (req, res, next) => {
     next(error);
   }
 };
-
-// const updateStatusContact = async (req, res, next) => {
-//   try {
-//     const contact = await updateStatusContact(req.params.id, req.body);
-//     if (contact) {
-//       return res
-//         .status(200)
-//         .json({ status: "success", code: 200, data: { contact } });
-//     }
-//     return res.status(404).json({
-//       status: "error",
-//       code: 404,
-//       message: "Not found",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 module.exports = {
   getAll,
