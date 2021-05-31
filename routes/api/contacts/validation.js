@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 const schemaCreateContact = Joi.object({
-  // name: Joi.string().min(2).max(30).required(),
   name: Joi.string()
     .regex(/^[a-zA-Z0-9 ]*$/, "Alphanumerics and space")
     .min(2)
