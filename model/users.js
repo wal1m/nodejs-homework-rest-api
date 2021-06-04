@@ -22,8 +22,8 @@ const update = async (id, body) => {
   return body;
 };
 
-const updateAvatar = async (id, avatar) => {
-  return await User.updateOne({ _id: id }, { avatar });
+const updateAvatar = async (id, avatarURL) => {
+  return await User.updateOne({ _id: id }, { avatarURL });
 };
 
 module.exports = {
