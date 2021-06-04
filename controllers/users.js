@@ -2,7 +2,9 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const Users = require("../model/users");
 const { HttpCode } = require("../helpers/constants");
+const UploadAvatar = require("../services/upload-avatars-server");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
 
 const signup = async (req, res, next) => {
   try {
@@ -15,17 +17,17 @@ const signup = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
-    const { id, email } = newUser;
+    const { id, email, avatarURL } = newUser;
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
       data: {
         id,
         email,
+        avatarURL,
       },
     });
   } catch (error) {
-    console.log("error111");
     next(error);
   }
 };
@@ -82,7 +84,6 @@ const getCurrentUser = async (req, res, next) => {
 const updateSubscription = async (req, res, next) => {
   try {
     const { subscription } = await Users.update(req.user.id, req.body);
-    console.log(subscription);
     return res.status(HttpCode.OK).json({
       status: "success",
       code: HttpCode.OK,
@@ -95,4 +96,32 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, login, logout, getCurrentUser, updateSubscription };
+const avatars = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    const uploads = new UploadAvatar(AVATARS_OF_USERS);
+    const avatarUrl = await uploads.saveAvatarToStatic({
+      idUser: id,
+      pathFile: req.file.path,
+      name: req.file.filename,
+      oldFile: req.user.avatarURL,
+    });
+    await Users.updateAvatar(id, avatarUrl);
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { avatarUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  logout,
+  getCurrentUser,
+  updateSubscription,
+  avatars,
+};
