@@ -9,14 +9,14 @@ const newContact = {
 const newUser = {
   email: "user@test.com",
   password: "qwerty",
-  subscription: "business",
+  // subscription: "business",
   // owner: {}
 };
 
 const newTestUser = {
   email: "new-user@test.com",
   password: "qwerty",
-  subscription: "business",
+  // subscription: "business",
   // owner: {}
 };
 
