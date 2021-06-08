@@ -3,7 +3,7 @@ const Contact = require("./shemas/contact");
 const getAll = async (userId, query) => {
   const {
     limit = 6,
-    page = 12,
+    page = 1,
     sortBy,
     sortByDesc,
     filter,

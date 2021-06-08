@@ -1,8 +1,19 @@
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
+const { promisify } = require("util");
+
 require("dotenv").config();
 const Users = require("../model/users");
 const { HttpCode } = require("../helpers/constants");
+const UploadAvatar = require("../services/upload-avatars-cloud");
+
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 const signup = async (req, res, next) => {
   try {
@@ -15,17 +26,17 @@ const signup = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
-    const { id, email } = newUser;
+    const { id, email, avatarURL } = newUser;
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
       data: {
         id,
         email,
+        avatarURL,
       },
     });
   } catch (error) {
-    console.log("error111");
     next(error);
   }
 };
@@ -82,7 +93,6 @@ const getCurrentUser = async (req, res, next) => {
 const updateSubscription = async (req, res, next) => {
   try {
     const { subscription } = await Users.update(req.user.id, req.body);
-    console.log(subscription);
     return res.status(HttpCode.OK).json({
       status: "success",
       code: HttpCode.OK,
@@ -95,4 +105,33 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, login, logout, getCurrentUser, updateSubscription };
+const avatars = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+
+    const uploadCloud = promisify(cloudinary.uploader.upload);
+    const uploads = new UploadAvatar(uploadCloud);
+    const { userIdImg, avatarUrl} = await uploads.saveAvatarToCloud(
+      req.file.path,
+      req.user.userIdImg
+    );
+
+    await Users.updateAvatar(id, avatarUrl, userIdImg);
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { avatarUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  logout,
+  getCurrentUser,
+  updateSubscription,
+  avatars,
+};

@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const mongoose = require("mongoose");
 
 const schemaCreateContact = Joi.object({
   name: Joi.string()
@@ -41,10 +42,17 @@ const validate = async (schema, body, next) => {
   }
 };
 
-module.exports.validateCreateContact = (reg, _res, next) => {
-  return validate(schemaCreateContact, reg.body, next);
+module.exports.validateCreateContact = (req, _res, next) => {
+  return validate(schemaCreateContact, req.body, next);
 };
 
-module.exports.validateUpdateContact = (reg, _res, next) => {
-  return validate(schemaUpdateContact, reg.body, next);
+module.exports.validateUpdateContact = (req, _res, next) => {
+  return validate(schemaUpdateContact, req.body, next);
+};
+
+module.exports.validateObjectId = (req, _res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next({ status: 400, message: "objectId is not valid" });
+  }
+  next();
 };
