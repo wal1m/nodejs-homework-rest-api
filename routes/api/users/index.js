@@ -5,6 +5,8 @@ const guard = require("../../../helpers/guard");
 const upload = require("../../../helpers/upload");
 const { validateUser, validateSubscription } = require("./validation");
 
+router.get("/verify/:token", ctrl.verify);
+router.post("/verify", ctrl.repeatSendEmailVerify);
 router.post("/signup", validateUser, ctrl.signup);
 router.post("/login", validateUser, ctrl.login);
 router.post("/logout", guard, ctrl.logout);
